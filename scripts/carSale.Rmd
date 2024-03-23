@@ -1,0 +1,58 @@
+---
+title: "carSale"
+author: "Antoni"
+date: "2024-03-23"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE, echo=FALSE}
+#If required install packages
+install.packages("ggplot2")
+install.packages("magrittr")
+install.packages("tidyverse")
+install.packages("plotly")
+
+library(tidyverse)
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+library(RColorBrewer)
+library(plotly)
+```
+
+## Load database 
+```{r}
+database = read.csv("../database/AutoSprzedam.dat", sep = "\t");
+head(database)
+```
+## Analiza danych
+
+### Udział poszczególnych marek w zbiorze 
+```{r}
+car_models = table(database$Marka);
+myPalette <- brewer.pal(5, "Set2") 
+pie(car_models, main="Udział poszczególnych marek", labels=paste(names(car_models), round(car_models/sum(car_models)*100, 2), "%"), border="white", col=myPalette);
+
+```
+```{r}
+names(database)
+hist(database$PrzebiegKm,
+     main = "Liczebność samochodów względem przebiegu",
+     xlab = "Przebieg [km]",
+     ylab = "Liczebność")
+```
+
+Redukcja danych odstających 3 sigma
+```{r}
+przebieg_mean = mean(database$PrzebiegKm);
+przebieg_std  = sd(database$PrzebiegKm);
+przebieg_3s_reduction = database$PrzebiegKm[(database$PrzebiegKm < (przebieg_mean + 3* przebieg_std)) &
+                                            (database$PrzebiegKm > (przebieg_mean - 3* przebieg_std))]
+
+hist(przebieg_3s_reduction,
+     main = "Liczebność samochodów względem przebiegu",
+     xlab = "Przebieg [km]",
+     ylab = "Liczebność")
+```
